@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/company_details/', company_details),
     path('api/runs/', RunViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/runs/<int:pk>/', RunViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
 ]
