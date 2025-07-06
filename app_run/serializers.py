@@ -1,18 +1,12 @@
 from django.contrib.auth.models import User
 
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework import serializers
 
 from app_run.models import Run
 
 
-class RunSerializer(ModelSerializer):
-    class Meta:
-        model = Run
-        fields = '__all__'
-
-
-class UserSerializer(ModelSerializer):
-    type = SerializerMethodField()
+class UserSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -22,3 +16,11 @@ class UserSerializer(ModelSerializer):
         if obj.is_staff:
             return 'coach'
         return 'athlete'
+
+
+class RunSerializer(serializers.ModelSerializer):
+    athlete_data = UserSerializer(source='athlete', read_only=True)
+
+    class Meta:
+        model = Run
+        fields = '__all__'
