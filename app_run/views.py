@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
@@ -21,6 +22,8 @@ def company_details(request):
 class RunViewSet(ModelViewSet):
     queryset = Run.objects.select_related('athlete').all()
     serializer_class = RunSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -34,6 +37,8 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_superuser=False)
     lookup_field = 'is_staff'
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
     
     def get_queryset(self) -> 'QuerySet[User]':
         """
