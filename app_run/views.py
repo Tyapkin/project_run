@@ -68,7 +68,7 @@ class UserViewSet(ReadOnlyModelViewSet):
 
 
 class RunStartAPIView(APIView):
-    def put(self, request, pk, format=None):
+    def post(self, request, pk, format=None):
         run = get_object_or_404(Run, pk=pk)
         if run.status not in [Run.RunStatus.IN_PROGRESS, Run.RunStatus.FINISHED]:
             serializer = RunSerializer(run, data={'status': Run.RunStatus.IN_PROGRESS}, partial=True)
@@ -80,7 +80,7 @@ class RunStartAPIView(APIView):
 
 
 class RunStopAPIView(APIView):
-    def put(self, request, pk, format=None):
+    def post(self, request, pk, format=None):
         run = get_object_or_404(Run, pk=pk)
         if run.status == Run.RunStatus.IN_PROGRESS:
             serializer = RunSerializer(run, data={'status': Run.RunStatus.FINISHED}, partial=True)
