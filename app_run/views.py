@@ -2,12 +2,13 @@ from rest_framework.decorators import api_view
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import status
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from app_run.models import Run
 from app_run.serializers import RunSerializer, UserSerializer
@@ -25,8 +26,10 @@ def company_details(request):
 class RunViewSet(ModelViewSet):
     queryset = Run.objects.select_related('athlete').all()
     serializer_class = RunSerializer
-    filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'last_name']
+    filter_backends = [SearchFilter, DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['created_at']
+    search_fields = ['athlete__first_name', 'athlete__last_name']
+    filterset_fields = ['status', 'athlete']
 
 
 class UserViewSet(ReadOnlyModelViewSet):
@@ -40,13 +43,14 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.filter(is_superuser=False)
     lookup_field = 'is_staff'
-    filter_backends = [SearchFilter]
+    filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ['first_name', 'last_name']
+    ordering_fields = ['date_joined']
     
     def get_queryset(self) -> 'QuerySet[User]':
         """
         Filter the queryset based on the 'type' query parameter.
-        
+
         Returns:
             QuerySet[User]: Filtered queryset of User objects.
                 - If type='coach': returns staff users
@@ -54,16 +58,16 @@ class UserViewSet(ReadOnlyModelViewSet):
                 - Otherwise: returns all non-superuser users
         """
         user_type = self.request.query_params.get('type')
-        
+
         # Use a dictionary mapping for cleaner, more maintainable code
         type_filters = {
             'coach': {'is_staff': True},
             'athlete': {'is_staff': False}
         }
-        
+
         if user_type in type_filters:
             return self.queryset.filter(**type_filters[user_type])
-        
+
         return self.queryset
 
 
