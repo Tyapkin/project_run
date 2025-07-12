@@ -117,8 +117,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 COMPANY_NAME = 'Running Skuf'
 SLOGAN = 'Run, Skuf, Run'
 CONTACTS = '@pan_ded'
-
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 2
-}

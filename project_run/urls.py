@@ -15,16 +15,22 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from app_run.views import RunStartAPIView, RunStopAPIView, company_details, UserViewSet, RunViewSet
+
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'runs', RunViewSet, basename='run')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/company_details/', company_details),
-    path('api/runs/', RunViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('api/runs/<int:pk>/', RunViewSet.as_view({'get': 'retrieve'})),
-    path('api/users/', UserViewSet.as_view({'get': 'list'})),
+    path('api/', include(router.urls)),
+    # path('api/runs/', RunViewSet.as_view({'get': 'list', 'post': 'create'})),
+    # path('api/runs/<int:pk>/', RunViewSet.as_view({'get': 'retrieve'})),
+    # path('api/users/', UserViewSet.as_view({'get': 'list'})),
     path('api/runs/<int:pk>/start/', RunStartAPIView.as_view()),
     path('api/runs/<int:pk>/stop/', RunStopAPIView.as_view()),
 ]
