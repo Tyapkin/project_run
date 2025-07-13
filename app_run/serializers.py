@@ -36,6 +36,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class AthleteInfoSerializer(serializers.ModelSerializer):
+    user_id = serializers.SerializerMethodField(source='user_id')
+
     class Meta:
         model = AthleteInfo
-        fields = '__all__'
+        fields = ['goals', 'weight', 'user_id']
+
+    def get_user_id(self, obj):
+        return obj.user.id
