@@ -116,7 +116,7 @@ class AthleteInfoAPIView(APIView):
         athlete_info, created = AthleteInfo.objects.get_or_create(user=get_object_or_404(User, pk=pk))
         athlete_info = AthleteInfoSerializer(athlete_info, data=athlete_info.to_dict())
         if athlete_info.is_valid(raise_exception=True):
-            return Response(athlete_info.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            return Response(athlete_info.data, status=status.HTTP_200_OK)
         return Response({'error': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk, format=None):
