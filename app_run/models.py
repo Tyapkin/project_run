@@ -23,7 +23,7 @@ class Run(models.Model):
 class AthleteInfo(models.Model):
     user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
     goals = models.TextField(blank=True)
-    weight = models.FloatField(blank=True, null=True)
+    weight = models.FloatField(default=0, blank=True)
 
     def to_dict(self) -> dict:
         return {
