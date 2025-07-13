@@ -44,3 +44,8 @@ class AthleteInfoSerializer(serializers.ModelSerializer):
 
     def get_user_id(self, obj):
         return obj.user.id
+
+    def validate_weight(self, value):
+        if not 0 < value < 900:
+            raise serializers.ValidationError('Weight must be between 0 and 900')
+        return value

@@ -105,13 +105,6 @@ class RunStopAPIView(APIView):
 
 
 class AthleteInfoAPIView(APIView):
-
-    @staticmethod
-    def weight_is_valid(weight: int | float) -> bool:
-        if weight < 0 or weight > 900:
-            return False
-        return True
-
     def get(self, request, pk, format=None):
         athlete_info, created = AthleteInfo.objects.get_or_create(user=get_object_or_404(User, pk=pk))
         athlete_info = AthleteInfoSerializer(athlete_info, data=athlete_info.to_dict())
@@ -120,8 +113,6 @@ class AthleteInfoAPIView(APIView):
         return Response({'error': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk, format=None):
-        if not self.weight_is_valid(request.data['weight']):
-            return Response({'error': 'Weight must be between 0 and 900'}, status=status.HTTP_400_BAD_REQUEST)
         athlete_info, created = AthleteInfo.objects.update_or_create(
             user=get_object_or_404(User, pk=pk),
             defaults=request.data
