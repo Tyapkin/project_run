@@ -18,3 +18,17 @@ class Run(models.Model):
 
     def __str__(self) -> str:
         return f"Run by {self.athlete.username} on {self.created_at.date()}"
+
+
+class AthleteInfo(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    goals = models.TextField(blank=True)
+    weight = models.FloatField(blank=True, null=True)
+
+    def to_dict(self) -> dict:
+        return {
+            'user': self.user.id,
+            'goals': self.goals,
+            'weight': self.weight,
+        }
+

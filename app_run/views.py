@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -11,8 +12,8 @@ from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from app_run.models import Run
-from app_run.serializers import RunSerializer, UserSerializer
+from app_run.models import Run, AthleteInfo
+from app_run.serializers import RunSerializer, UserSerializer, AthleteInfoSerializer
 
 
 class CustomPagination(PageNumberPagination):
@@ -101,3 +102,23 @@ class RunStopAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response({'message': 'Run not started'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AthleteInfoAPIView(APIView):
+
+    def get(self, request, pk, format=None):
+        athlete_info, created = AthleteInfo.objects.get_or_create(user=get_object_or_404(User, pk=pk))
+        athlete_info = AthleteInfoSerializer(athlete_info, data=athlete_info.to_dict())
+        if athlete_info.is_valid(raise_exception=True):
+            return Response(athlete_info.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response({'error': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk, format=None):
+        athlete_info, created = AthleteInfo.objects.update_or_create(
+            user=get_object_or_404(User, pk=pk),
+            defaults=request.data
+        )
+        athlete_info = AthleteInfoSerializer(athlete_info, data=athlete_info.to_dict())
+        if athlete_info.is_valid(raise_exception=True):
+            return Response(athlete_info.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response({'error': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
