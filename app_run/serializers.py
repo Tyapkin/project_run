@@ -20,12 +20,16 @@ class RunSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+    runs_finished = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'date_joined', 'first_name', 'last_name', 'type']
+        fields = ['id', 'username', 'date_joined', 'first_name', 'last_name', 'type', 'runs_finished']
 
     def get_type(self, obj):
         if obj.is_staff:
             return 'coach'
         return 'athlete'
+
+    def get_runs_finished(self, obj):
+        return obj.run_set.filter(status=Run.RunStatus.FINISHED).count()
