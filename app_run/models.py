@@ -32,3 +32,10 @@ class AthleteInfo(models.Model):
             'weight': self.weight,
         }
 
+class Challenge(models.Model):
+    full_name = models.CharField(max_length=255)
+    athlete = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Challenge for {self.athlete.username}"
+

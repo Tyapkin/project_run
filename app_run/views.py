@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from app_run.models import AthleteInfo, Run
-from app_run.serializers import AthleteInfoSerializer, RunSerializer, UserSerializer
+from app_run.models import AthleteInfo, Challenge, Run
+from app_run.serializers import AthleteInfoSerializer, ChallengeSerializer, RunSerializer, UserSerializer
 
 
 class CustomPagination(PageNumberPagination):
@@ -92,12 +92,19 @@ class RunStartAPIView(APIView):
 
 
 class RunStopAPIView(APIView):
+    def create_challenge(self, athlete: User) -> None:
+        if athlete.run_set.filter(status=Run.RunStatus.FINISHED).count() == 10:
+            serializer = ChallengeSerializer(data={'athlete': athlete.id, 'full_name': 'Сделай 10 забегов'})
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+
     def post(self, request, pk, format=None):
         run = get_object_or_404(Run, pk=pk)
         if run.status == Run.RunStatus.IN_PROGRESS:
             serializer = RunSerializer(run, data={'status': Run.RunStatus.FINISHED}, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
+            self.create_challenge(run.athlete)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response({'message': 'Run not started'}, status=status.HTTP_400_BAD_REQUEST)
@@ -120,3 +127,15 @@ class AthleteInfoAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChallengeViewSet(ModelViewSet):
+    serializer_class = ChallengeSerializer
+    queryset = Challenge.objects.select_related('athlete').all()
+
+    def get(self, request, *args, **kwargs):
+        challenge = get_object_or_404(Challenge, athlete_id=request.query_params.get('athlete'))
+        serializer = ChallengeSerializer(challenge)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'error': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
